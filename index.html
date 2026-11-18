@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#211b19">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="금기의 서재">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>금기의 서재</title>
+<style>
+:root{--ink:#251d19;--paper:#f2e8d4;--paper2:#e7d8bd;--gold:#bd9659;--muted:#766656;--wood:#38251c;--wood2:#563b2a}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Noto Serif KR","Nanum Myeongjo",serif;color:var(--ink)}
+body{background:radial-gradient(ellipse at 50% 20%,#57402e,#211815 72%);min-height:100dvh}
+button{font:inherit;cursor:pointer;color:inherit}
+#app{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px}
+.screen{width:min(980px,100%);min-height:min(720px,calc(100dvh - 40px));position:relative}
+.hidden{display:none!important}
+.start{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#ead9b9;gap:24px}
+.start h1{font-size:clamp(42px,8vw,76px);letter-spacing:.16em;margin:0;text-shadow:0 5px 20px #000}
+.start .subtitle{letter-spacing:.35em;color:#c2a77d;font-size:13px}
+.enter{border:1px solid #b99a68;background:transparent;color:#ead9b9;padding:14px 42px;letter-spacing:.2em;margin-top:22px}
+.enter:active{background:#6c4d32}
+.shelf-screen{padding:24px 10px 30px;display:flex;flex-direction:column;justify-content:center}
+.shelf-title{text-align:center;color:#e8d6b5;letter-spacing:.25em;font-size:24px;margin:0 0 28px}
+.bookcase{background:linear-gradient(90deg,#2b1b14,#543725 8%,#3b271d 92%,#21150f);border:12px solid #291a13;box-shadow:0 18px 40px #100b09,inset 0 0 0 2px #86603d;padding:22px 16px 18px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;position:relative}
+.bookcase:before,.bookcase:after{content:"";position:absolute;left:-12px;right:-12px;height:15px;background:linear-gradient(#8b603a,#4a2c1c,#2b1a12);box-shadow:0 5px 8px #130b07}
+.bookcase:before{top:-14px}.bookcase:after{bottom:-15px}
+.book{height:270px;min-width:0;border:0;border-radius:4px 7px 7px 4px;position:relative;display:flex;align-items:center;justify-content:center;padding:15px 8px;box-shadow:inset 7px 0 8px #0005,inset -2px 0 3px #fff2,3px 5px 8px #100a07;transition:transform .18s}
+.book:before{content:"";position:absolute;left:8px;top:0;bottom:0;width:3px;background:#ffffff28}
+.book:after{content:"";position:absolute;left:0;right:0;top:13px;height:2px;background:#ffffff33;box-shadow:0 3px 0 #0002}
+.book:hover{transform:translateY(-8px)}
+.book span{writing-mode:vertical-rl;text-orientation:mixed;color:#f4e5c8;font-size:20px;letter-spacing:.16em;text-shadow:0 2px 2px #0008}
+.book small{position:absolute;bottom:13px;color:#e4cda5;font-size:10px;letter-spacing:.12em}
+.b1{background:linear-gradient(90deg,#283c35,#456153,#24372f)}.b2{background:linear-gradient(90deg,#49312b,#815044,#432923)}.b3{background:linear-gradient(90deg,#344052,#596b82,#2e3b4c)}.b4{background:linear-gradient(90deg,#6b4b25,#a77b3e,#65451f)}.b5{background:linear-gradient(90deg,#4a3b55,#746181,#40334a)}
+.shelf-hint{text-align:center;color:#bca27d;font-size:12px;letter-spacing:.12em;margin-top:32px}
+.reader{background:var(--paper);min-height:min(720px,calc(100dvh - 40px));padding:22px;display:flex;flex-direction:column;box-shadow:0 15px 50px #100a08}
+.back{align-self:flex-start;background:none;border:0;color:#6d5844;padding:8px 0;font-size:14px}
+.read-area{flex:1;display:flex;align-items:center;justify-content:center;padding:25px 8px;cursor:pointer;user-select:none}
+.read-text{max-width:680px;font-size:clamp(19px,3.1vw,25px);line-height:2.05;word-break:keep-all;white-space:pre-line}
+.page-foot{text-align:center;color:#947d61;font-size:12px;letter-spacing:.12em;padding:12px}
+.panel{background:var(--paper);min-height:min(720px,calc(100dvh - 40px));padding:24px;box-shadow:0 15px 50px #100a08}
+.panel h2{font-size:26px;font-weight:500;letter-spacing:.12em;margin:20px 0 8px}
+.panel .desc{color:var(--muted);font-size:14px;line-height:1.8}
+.select-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:26px 0}
+.choice{background:#e7d8bd;border:1px solid #c8b18c;padding:17px 14px;text-align:left;min-height:72px}
+.choice strong{display:block;font-size:17px;font-weight:500}.choice small{display:block;color:#786651;margin-top:6px}
+.choice.selected{background:#d6c19c;border:2px solid #8c6a3d;padding:16px 13px}
+.counts{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 26px}
+.count{border:1px solid #bca27d;background:transparent;padding:10px 17px}
+.count.selected{background:#5a4633;color:#f5e8d2;border-color:#5a4633}
+.primary{background:#473326;color:#f4e6ce;border:0;padding:13px 25px;letter-spacing:.1em}
+.primary:disabled{opacity:.35}
+.question{font-size:clamp(20px,3vw,25px);line-height:1.7;margin:24px 0;word-break:keep-all}
+.q-meta{font-size:12px;color:#88745a;letter-spacing:.12em}
+.answers{display:grid;gap:10px}
+.answer{background:#e8dcc7;border:1px solid #cbb895;text-align:left;padding:14px 16px;line-height:1.6}
+.answer.chosen{border:2px solid #765735;background:#d8c4a2;padding:13px 15px}
+.answer.correct{background:#d7dfce;border-color:#75886c}.answer.wrong{background:#ead1c8;border-color:#a66b5c}
+.feedback{margin-top:18px;padding:14px;background:#e4d6bf;line-height:1.7;font-size:14px}
+.quiz-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:24px}
+.result-score{font-size:54px;text-align:center;margin:40px 0 8px;color:#65482e}
+.result-label{text-align:center;color:#79664f}
+.result-list{margin:25px 0;display:grid;gap:9px}
+.result-item{padding:12px;background:#e8dcc7;line-height:1.6;font-size:14px}
+.explain-content{font-size:16px;line-height:1.95;white-space:pre-line;word-break:keep-all;margin:22px 0}
+.explain-content h3{font-size:19px;font-weight:500;margin:24px 0 8px}
+
+/* 읽기와 터치 사용성 보정 */
+html,body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+*{-webkit-tap-highlight-color:transparent}
+button,input{ -webkit-appearance:none; appearance:none }
+button:focus,input:focus{outline:none;box-shadow:none}
+button:focus-visible,input:focus-visible{outline:2px solid #9a7748;outline-offset:3px}
+button{touch-action:manipulation}
+.start{gap:26px}.start h1{font-size:clamp(42px,8vw,70px);letter-spacing:.12em;line-height:1.25}
+.enter{font-size:17px;min-width:132px;padding:12px 30px;margin:0;border-radius:2px}
+.shelf-screen{padding:30px 16px 42px}.shelf-title{font-size:25px;letter-spacing:.12em}
+.bookcase{gap:13px;padding:24px 18px 22px}
+.book{min-height:240px;height:clamp(220px,29vw,280px)}
+.book span{font-size:clamp(16px,2vw,20px);line-height:1.5;letter-spacing:.1em}
+.book small{font-size:11px}
+.reader{min-height:min(760px,calc(100dvh - 40px));padding:22px clamp(18px,5vw,54px);background:linear-gradient(90deg,#e6d9c2 0,#f5eddf 5%,#f5eddf 95%,#e6d9c2 100%);}
+.read-area{min-height:0;flex:1;display:flex;align-items:center;justify-content:center;padding:34px 12px;cursor:default;user-select:text}
+.read-text{max-width:660px;width:100%;font-size:clamp(18px,2.3vw,22px);line-height:2.05;letter-spacing:.015em;color:#30251d;word-break:keep-all;overflow-wrap:break-word;white-space:normal;text-align:justify}
+.page-nav{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d5c5a8;padding-top:14px;gap:14px}
+.page-button{background:transparent;border:1px solid #bba786;color:#5b4733;padding:11px 22px;min-width:104px;border-radius:2px;font-size:14px}
+.page-button:disabled{opacity:.28;cursor:default}
+.panel{padding:clamp(20px,4vw,38px);min-height:min(760px,calc(100dvh - 40px));}
+.panel h2{font-size:clamp(23px,3vw,28px);line-height:1.4;letter-spacing:.06em;margin:22px 0 10px}
+.panel .desc{font-size:15px;line-height:1.85}
+.select-list{gap:13px;margin:24px 0}
+.choice{border-radius:2px;padding:18px 16px;min-height:78px;line-height:1.5}
+.choice strong{font-size:16px;line-height:1.55}.choice small{font-size:13px}
+.question{font-size:clamp(19px,2.6vw,24px);line-height:1.8;margin:25px 0}
+.answer{font-size:16px;line-height:1.75;padding:15px 17px;border-radius:2px}
+.feedback{font-size:15px;line-height:1.85;border-left:3px solid #9b805c}
+.count-label{display:block;color:#766656;font-size:14px;margin-top:24px}
+.count-entry{display:flex;align-items:center;gap:10px;margin:10px 0 0}
+.count-entry input{width:100px;height:48px;background:#fffaf0;border:1px solid #c8b18c;border-radius:2px;text-align:center;font:inherit;font-size:20px;color:#30251d;caret-color:#765735;}
+.count-entry span{font-size:14px;color:#766656}
+.count-error{font-size:12px;color:#927d61;margin:7px 0 20px;min-height:18px}
+.primary{font-size:15px;border-radius:2px;min-height:46px;padding:12px 24px}
+.result-item{font-size:15px;line-height:1.8;padding:14px 16px}
+.explain-content{font-size:16px;line-height:2;letter-spacing:.005em;white-space:pre-line;word-break:keep-all}
+@media(max-width:650px){
+ #app{padding:0}.screen{min-height:100dvh}.shelf-screen{padding:26px 14px 38px}
+ .bookcase{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:17px 10px 19px}
+ .book{height:clamp(175px,48vw,220px);min-height:175px;padding:12px 5px}
+ .book span{font-size:clamp(14px,4vw,17px);letter-spacing:.06em}
+ .book small{font-size:10px;bottom:10px}
+ .reader,.panel{min-height:100dvh;padding:18px 18px calc(18px + env(safe-area-inset-bottom))}
+ .read-area{padding:25px 4px;}
+ .read-text{font-size:18px;line-height:2.05}
+ .page-button{min-width:94px;padding:12px 16px}
+ .quiz-actions{margin-top:20px}
+}
+
+@media(max-width:650px){#app{padding:0}.screen{min-height:100dvh}.shelf-screen{padding:25px 12px}.bookcase{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:18px 10px 20px}.book{height:205px}.book span{font-size:17px}.book:nth-child(4),.book:nth-child(5){height:185px}.reader,.panel{min-height:100dvh;padding:18px}.read-area{padding:12px 4px}.read-text{font-size:20px;line-height:1.9}}
+
+/* 전체 화면 정돈 및 문장 단위 자동 페이지 나눔 */
+:root{--ink:#2c241d;--paper:#f6efe3;--paper2:#e9ddc9;--gold:#a78350;--muted:#766958}
+#app{padding:clamp(12px,2.4vw,28px)}
+.screen{width:min(920px,100%)}
+.shelf-screen{gap:0}
+.bookcase{border-width:10px;border-radius:3px;box-shadow:0 14px 34px #100b09,inset 0 0 0 1px #86603d}
+.book{border-radius:3px 5px 5px 3px}
+.reader{height:min(760px,calc(100dvh - 40px));min-height:420px;overflow:hidden;border:1px solid #d6c5a8;border-radius:3px;padding:clamp(18px,3vw,34px) clamp(18px,5vw,58px);background:linear-gradient(90deg,#e9ddca 0,#f8f2e8 5%,#f8f2e8 95%,#e9ddca 100%);}
+.reader .back,.panel .back{font-size:14px;min-height:36px;color:#725c43}
+.read-area{min-height:0;overflow:hidden;padding:22px 12px;}
+.read-text{max-width:650px;font-size:clamp(18px,2.15vw,21px);line-height:1.9;letter-spacing:0;word-break:keep-all;overflow-wrap:anywhere;text-align:left;margin:auto;}
+.page-nav{flex:0 0 auto;padding-top:15px;border-top:1px solid #d8c9b1;}
+.page-button{min-height:44px;min-width:104px;border-color:#c9b795;background:#f4ecdf;transition:background .15s,border-color .15s;}
+.page-button:not(:disabled):active{background:#e8d9c0;border-color:#a88a5e}
+.page-indicator{font-size:12px;letter-spacing:.1em;color:#927d62;font-variant-numeric:tabular-nums}
+.panel{border:1px solid #d6c5a8;border-radius:3px;overflow-y:auto;}
+.panel h2{color:#392d23;margin-top:26px}
+.choice,.answer,.result-item{border-radius:3px;}
+.choice{transition:background .15s,border-color .15s}
+.choice:active,.answer:active{background:#ddceb4}
+.primary{border-radius:3px;background:#4c3929;transition:background .15s}
+.primary:not(:disabled):active{background:#6a5037}
+.count-entry input{border-radius:3px}
+.explain-content{max-width:760px;margin:28px auto;}
+@media(max-width:650px){
+ #app{padding:0}
+ .reader{height:100dvh;min-height:0;border:0;border-radius:0;padding:calc(14px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom));}
+ .read-area{padding:18px 3px;}
+ .read-text{font-size:19px;line-height:1.88;}
+ .page-nav{padding-top:12px;}
+ .page-button{min-width:90px;padding:10px 13px;}
+ .panel{border:0;border-radius:0;padding-top:calc(18px + env(safe-area-inset-top));}
+ .shelf-title{margin-bottom:24px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+
+/* V4: 독서·퀴즈·해설 화면 세부 정돈 */
+.book.b1 span{font-size:clamp(13px,1.55vw,16px);letter-spacing:.07em;line-height:1.4}
+.count-entry{align-items:stretch;gap:12px}
+.count-entry span{display:flex;align-items:center;height:48px;font-size:20px;line-height:1;color:#594735}
+.count-entry input{flex:0 0 100px;width:100px;height:48px;font-size:20px}
+.page-nav{justify-content:center;gap:22px}
+.page-button{min-width:48px;width:48px;height:44px;padding:0;font-size:25px;line-height:1;border-radius:50%;display:grid;place-items:center}
+.page-indicator{min-width:48px;text-align:center}
+.quiz-actions{justify-content:flex-end}
+.quiz-meta-number{font-size:13px;color:#8a7458;letter-spacing:.1em;margin-top:10px}
+.quiz-explanation{margin-top:18px;padding:17px 18px;background:#eee3d1;border:1px solid #cdbb9c;border-radius:3px;line-height:1.8}
+.quiz-explanation-title{font-weight:700;font-size:15px;margin:0 0 7px;color:#55402c}
+.quiz-explanation p{margin:0;font-weight:400}
+.result-item{border:1px solid #d0bea0;border-radius:4px;background:#f0e5d2}
+.result-item .result-question{font-weight:700;margin-bottom:10px;line-height:1.65}
+.result-item .result-answer{margin:5px 0 10px}
+.result-item .result-explanation{padding:12px 14px;margin-top:10px;background:#e4d7c2;border:1px solid #cdbb9c;border-radius:3px;line-height:1.75}
+.result-item .result-explanation strong{display:block;margin-bottom:5px}
+.explain-content{white-space:normal;line-height:1.9}
+.explain-heading{margin:24px 0 10px;padding:11px 14px;background:#e9dcc6;border:1px solid #cdbb9c;border-left:4px solid #8d704b;border-radius:3px;font-size:18px;font-weight:750;line-height:1.5}
+.explain-paragraph{margin:0 0 16px;line-height:1.95;font-weight:400;word-break:keep-all}
+.explain-work-title{padding:15px 17px;margin:0 0 22px;background:#e9dcc6;border:1px solid #cdbb9c;border-radius:3px}
+.explain-work-title strong{display:block;font-size:19px;font-weight:750;margin-bottom:4px}
+.explain-work-title span{font-size:13px;color:#766656}
+@media(max-width:650px){
+ .book.b1 span{font-size:clamp(12px,3.2vw,14px);letter-spacing:.035em}
+ .count-entry span{font-size:19px}
+ .page-nav{gap:18px}
+}
+
+
+/* V5: 책 제목 두 줄 배치와 문단 단위 독서 */
+.book.b1 > span{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:.22em;
+  height:100%;
+}
+.book.b1 > span > span{
+  display:block;
+  font:inherit;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+}
+.count-entry span{
+  font-size:26px;
+  font-weight:600;
+  letter-spacing:.015em;
+  color:#594735;
+}
+@media(max-width:650px){
+  .count-entry span{font-size:25px}
+}
+
+
+/* V6: 책장 제목 중앙 분리 배치와 문제 수 입력 비율 조정 */
+.book.b1 > span{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:.22em;
+  height:100%;
+  margin:0 auto;
+}
+.book.b1 > span > span{
+  display:block;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  line-height:1.4;
+}
+.count-entry{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-start;
+  gap:9px;
+  width:max-content;
+}
+.count-entry input{
+  flex:0 0 58px;
+  width:58px;
+  min-width:58px;
+  height:48px;
+  padding:0 4px;
+  font-size:20px;
+}
+.count-entry span{
+  display:flex;
+  align-items:center;
+  height:48px;
+  margin:0;
+  font-size:28px;
+  line-height:1;
+  font-weight:650;
+  color:#594735;
+}
+@media(max-width:650px){
+  .count-entry input{flex-basis:56px;width:56px;min-width:56px}
+  .count-entry span{font-size:27px}
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+<section id="start" class="screen start">
+  <h1>금기의 서재</h1>
+  <button class="enter" onclick="showShelf()">터치</button>
+</section>
+<section id="shelf" class="screen shelf-screen hidden">
+  <h2 class="shelf-title">금기의 서재</h2>
+  <div class="bookcase">
+    <button class="book b1" onclick="openReader('hwang')"><span><span>황만근은</span><span>이렇게 말했다</span></span><small>성석제</small></button>
+    <button class="book b2" onclick="openReader('dark')"><span>어둠의 혼</span><small>김원일</small></button>
+    <button class="book b3" onclick="openReader('soon')"><span>순이 삼촌</span><small>현기영</small></button>
+    <button class="book b4" onclick="openQuizSelect()"><span>퀴즈북</span><small>문학 확인</small></button>
+    <button class="book b5" onclick="openExplainSelect()"><span>해설집</span><small>작품 해설</small></button>
+  </div>
+  <div class="shelf-hint">읽을 책을 선택하세요</div>
+</section>
+<section id="reader" class="screen reader hidden">
+  <button class="back" onclick="showShelf()">← 책장으로</button>
+  <div class="read-area" id="readArea"><div id="readText" class="read-text"></div></div>
+  <nav class="page-nav" aria-label="책 페이지 이동">
+    <button id="prevPage" class="page-button" aria-label="이전 페이지" title="이전 페이지" onclick="prevPage()">←</button>
+    <span id="pageIndicator" class="page-indicator" aria-live="polite">1 / 1</span>
+    <button id="nextPageBtn" class="page-button" aria-label="다음 페이지" title="다음 페이지" onclick="nextPage()">→</button>
+  </nav>
+</section>
+<section id="quizSelect" class="screen panel hidden">
+  <button class="back" onclick="showShelf()">← 책장으로</button>
+  <h2>퀴즈북</h2><div class="desc">확인하고 싶은 작품과 문제 수를 선택하세요.</div>
+  <div id="quizBooks" class="select-list"></div>
+  <label class="count-label" for="questionCount">문제 개수</label>
+  <div class="count-entry"><input id="questionCount" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="quiz-count" placeholder="1~8" aria-label="문제 개수 입력"><span>문제</span></div>
+  <p id="countError" class="count-error" aria-live="polite">1부터 8까지 숫자를 입력하세요.</p>
+  <button id="quizStart" class="primary" disabled onclick="startQuiz()">퀴즈 시작</button>
+</section>
+<section id="quiz" class="screen panel hidden">
+  <button class="back" onclick="openQuizSelect()">← 선택 화면으로</button>
+  <div id="qMeta" class="q-meta"></div><div id="qText" class="question"></div>
+  <div id="answers" class="answers"></div>
+  <div id="feedback" class="feedback hidden"></div>
+  <div class="quiz-actions"><button id="nextQ" class="primary" disabled onclick="nextQuestion()">정답 확인</button></div>
+</section>
+<section id="result" class="screen panel hidden">
+  <button class="back" onclick="showShelf()">← 책장으로</button>
+  <h2>학습 결과</h2><div id="score" class="result-score"></div><div id="scoreLabel" class="result-label"></div>
+  <div id="resultList" class="result-list"></div>
+  <button class="primary" onclick="openQuizSelect()">다시 풀기</button>
+</section>
+<section id="explainSelect" class="screen panel hidden">
+  <button class="back" onclick="showShelf()">← 책장으로</button>
+  <h2>해설집</h2><div class="desc">해설을 읽을 작품을 선택하세요.</div>
+  <div id="explainBooks" class="select-list"></div>
+</section>
+<section id="explain" class="screen panel hidden">
+  <button class="back" onclick="openExplainSelect()">← 작품 선택으로</button>
+  <div id="explainBody" class="explain-content"></div>
+</section>
+</div>
+<script>
+const works={
+hwang:{title:"황만근은 이렇게 말했다",author:"성석제",pages:[
+"황만근은 마을에서 온갖 궂은일을 도맡아 하는 사람이다. 말투가 어눌하고 행동이 엉뚱하다는 이유로 사람들은 그를 놀리고 무시한다.\n\n그는 어머니를 봉양하고 아들을 돌보며, 이웃이 부탁하는 일도 웬만하면 거절하지 않는다.",
+"마을 사람들은 황만근에게 논밭일과 허드렛일을 맡긴다. 황만근은 묵묵히 일을 해내지만, 사람들은 그의 수고를 고맙게 여기지 않고 당연하게 생각한다.\n\n그의 어머니는 생활력이 부족해 아들의 보살핌에 의지해 살아간다.",
+"어느 날 황만근이 농민 궐기 대회에 참석하러 간 뒤 돌아오지 않는다. 소식을 들은 마을 사람들은 황만근의 집으로 모여든다.\n\n그 가운데 귀농한 민씨는 황만근의 행방을 진심으로 걱정한다.",
+"대회가 열리기 전날 밤, 황만근은 민씨와 술을 마시며 마을 농민들의 농사 이야기를 나눈다. 그는 큰돈을 벌겠다며 무리하게 농사를 짓고 빚을 내는 사람들의 모습을 안타까워한다.\n\n이장은 황만근에게 경운기를 몰고 군청까지 가서 대회에 참석하라고 당부한다.",
+"민씨가 잠든 뒤 황만근은 경운기를 몰고 군청으로 향한다. 그는 대회에 참석한 뒤 집으로 돌아오던 길에 경운기를 몰고 가다 길가의 논으로 빠진다.\n\n경운기는 망가지고 황만근은 그 곁에서 밤을 보내게 된다.",
+"추운 밤이 지나도록 황만근은 집으로 돌아오지 못한다. 그는 부서진 경운기 옆에서 밤을 지새우다 결국 목숨을 잃는다.\n\n뒤늦게 황만근의 죽음이 알려지고, 민씨는 그를 기리는 묘비명을 쓴다."
+]},
+dark:{title:"어둠의 혼",author:"김원일",pages:[
+"어린 갑해가 사는 마을에 아버지가 경찰에 붙잡혔다는 소식이 퍼진다. 비슷한 일로 붙잡힌 청년들이 총살당했다는 이야기에 마을 사람들은 아버지도 죽게 될 것이라고 말한다.\n\n그러나 갑해는 아버지의 죽음이나 사람들이 말하는 이념의 의미를 제대로 이해하지 못한다.",
+"갑해에게 가장 크게 느껴지는 고통은 굶주림이다. 아버지가 집을 비운 뒤 가족은 먹을 것이 부족해졌고, 갑해는 누나와 여동생 분선의 밥투정을 달래야 한다.\n\n갑해는 가족을 굶주리게 한 아버지가 원망스럽기도 하다.",
+"갑해는 어느 겨울밤 순사들이 집으로 들이닥쳤을 때 아버지가 담을 넘어 달아나던 모습을 떠올린다. 그 모습을 생각하면 아버지가 불쌍하게 느껴지기도 한다.\n\n배고픔을 견디기 어려워진 갑해는 먹을 것을 얻으려고 어머니를 찾아 나선다.",
+"갑해는 술집을 꾸려 가는 이모의 집에서 어머니를 만난다. 이모가 내준 국밥을 먹은 뒤, 갑해는 지서에 가서 붙잡혀 있는 아버지를 만나 보라는 말을 듣는다.\n\n갑해는 아버지를 만나기 위해 지서로 향한다.",
+"지서에서 나오던 이모부는 갑해를 보고 잠시 망설이다가 그를 뒤뜰로 데려간다. 그곳에서 갑해는 아버지의 시신을 보게 된다.\n\n갑해는 그제야 아버지가 죽었다는 사실을 알게 되지만, 이모부가 왜 자신에게 그 모습을 보여 주었는지는 이해하지 못한다.",
+"갑해는 강변으로 가서 울다가 지쳐 쓰러진다. 그는 이모부가 아버지의 죽음을 직접 보여 준 까닭을 생각한다.\n\n갑해는 앞으로 살아가려면 어떤 슬픔과 괴로움도 견뎌야 한다는 뜻이었을지 모른다고 짐작한다. 하지만 그 이유를 정확히 알지는 못한다."
+]},
+soon:{title:"순이 삼촌",author:"현기영",pages:[
+"할아버지 제사에 참석하려고 고향에 온 서술자 ‘나’는 친척 어른인 순이 삼촌이 세상을 떠났다는 소식을 듣는다. 순이 삼촌은 제주에서 촌수를 따지기 어려운 친척 어른을 부르는 호칭이다.\n\n순이 삼촌은 자신이 일구던 밭에서 숨진 채 발견되었다.",
+"‘나’는 순이 삼촌이 왜 세상을 떠났는지 궁금해한다. 주변 사람들의 이야기와 기억을 따라가면서, 그가 오랫동안 과거의 일로 괴로워했다는 사실을 알게 된다.\n\n순이 삼촌은 약 30년 전 제주에서 벌어진 비극적인 사건을 겪었다.",
+"제주 4·3 사건 당시 순이 삼촌은 군경의 토벌 과정에서 두 자식을 잃었다. 그는 가까스로 살아남았지만, 그날의 경험은 오랫동안 마음속에 남았다.\n\n그는 사건 이후 신경 쇠약과 환청에 시달리며 불안한 나날을 보냈다.",
+"순이 삼촌에게 자신이 일구던 옴팡밭은 평범한 밭이 아니었다. 그곳은 과거의 참혹한 사건이 벌어졌던 장소였고, 밭을 마주할 때마다 당시의 기억이 되살아났다.\n\n그는 그 장소와 기억에서 벗어나려고 애썼지만 쉽게 벗어날 수 없었다.",
+"마을 사람들은 제주 4·3 사건에 관해 이야기하기를 꺼린다. 오랜 세월 사건을 입 밖에 내기 어려웠던 분위기 속에서, 순이 삼촌이 겪은 일도 오랫동안 제대로 이야기되지 못했다.\n\n‘나’는 사람들의 기억과 증언을 통해 순이 삼촌의 과거를 조금씩 알게 된다.",
+"순이 삼촌은 끝내 과거의 상처에서 벗어나지 못하고 자신이 일구던 밭에서 생을 마감한다. 그의 죽음을 둘러싼 의문을 따라가던 ‘나’는 개인의 비극 뒤에 감춰져 있던 제주 4·3 사건의 참상을 마주한다."
+]}
+};
+const explain={
+hwang:`작품의 중심에는 '어수룩한 사람'이라는 마을의 평가와 실제 황만근의 삶 사이의 역설이 있다. 황만근은 남을 위해 일하고 가족을 책임지는 성실한 인물이지만, 마을 사람들은 그의 노동을 이용하면서도 인격을 존중하지 않는다.\n\n인물 대비\n황만근은 이타적·성실·희생의 가치를 보여 주고, 마을 사람들은 이기적·타산적 태도를 드러낸다. 민씨는 황만근의 진가를 알아보는 관찰자이자 작품의 평가적 시선을 대변한다.\n\n농촌 현실\n농민 궐기 대회와 농가 부채에 대한 언급은 1990년대 후반 농촌의 경제적 어려움을 반영한다. 무리한 영농과 빚은 농민들의 불안한 삶을 보여 주며, 작품은 개인의 성실함만으로 해결하기 어려운 구조적 문제도 환기한다.\n\n표현과 구성\n황만근의 실종을 먼저 제시하고 과거의 삶을 되짚는 방식으로 인물의 참모습을 드러낸다. 해학과 풍자는 웃음을 유발하지만, 그 이면에는 약자를 무시하고 이용하는 공동체에 대한 비판이 있다.\n\n시험 포인트\n황만근을 단순히 어리석은 인물로 판단하면 안 된다. 작품의 역설은 오히려 그를 무시한 마을 사람들이 도덕적으로 더 어리석을 수 있다는 데 있다.`,
+dark:`작품은 어린 갑해의 눈높이에서 이념 대립의 결과를 보여 준다. 갑해는 좌익·우익의 정치적 의미를 이해하지 못하고, 배고픔과 아버지의 부재처럼 몸으로 느끼는 현실을 먼저 인식한다.\n\n시대와 갈등\n배경은 광복 이후 좌우익 대립이 격화된 시기이며, 아버지의 체포와 죽음은 이념 갈등이 개인과 가족에게 미친 폭력을 상징한다. 작품의 중심은 특정 이념의 논리를 설명하는 데 있지 않고, 그 대립으로 희생되는 평범한 사람들의 삶에 있다.\n\n갑해의 복합 감정\n갑해에게 아버지는 가족을 굶주리게 한 원망의 대상이면서, 도망치던 모습을 떠올리면 연민을 느끼는 대상이기도 하다. 어린아이의 솔직하고 모순적인 감정은 전쟁 상황의 복잡성을 생생하게 만든다.\n\n시점의 효과\n어린아이의 제한된 시각은 사건의 정치적 맥락을 충분히 설명하지 않는다. 대신 독자가 아이의 인식과 실제 상황 사이의 간극을 읽어 내게 하여 이념의 허구성과 전쟁의 참혹함을 더욱 선명하게 드러낸다.\n\n제목과 주제\n'어둠'은 분단과 이념 대립, 폭력의 시대를, '혼'은 그 속에서 살아가야 하는 인간의 정신과 삶의 의지를 상징적으로 떠올리게 한다. 갑해가 아버지의 죽음을 마주하는 일은 고통스러운 현실을 인식하는 성장의 계기다.\n\n시험 포인트\n갑해가 아버지의 죽음보다 굶주림을 먼저 생각한다는 점은 무정함이 아니라 어린아이의 현실 인식이다. 이 시각을 통해 작품은 거대한 이념보다 인간의 생존과 가족의 고통을 앞세운다.`,
+soon:`작품은 순이 삼촌의 죽음이라는 개인적 사건을 출발점으로 삼아 제주 4·3 사건의 집단적 비극을 드러낸다. 서술자 '나'가 죽음의 원인을 추적하면서 독자는 과거의 학살과 생존자의 후유증을 알게 된다.\n\n역사적 배경\n제주 4·3 사건은 해방 이후 제주에서 발생한 무력 충돌과 진압 과정에서 수많은 주민이 희생된 비극이다. 작품은 국가 권력에 의해 무고한 민간인이 희생된 사실과 그 이후에도 이어진 침묵의 현실을 고발한다.\n\n순이 삼촌의 트라우마\n순이 삼촌은 두 자식을 잃고 살아남았지만, 생존이 곧 고통의 끝을 뜻하지는 않았다. 환청과 신경 쇠약, 옴팡밭에 대한 공포는 과거의 폭력이 현재의 삶에도 지속해서 영향을 미친다는 점을 보여 준다.\n\n침묵과 반공 이데올로기\n등장인물들이 사건을 말하기 꺼리는 태도는 단순한 개인적 비밀이 아니다. 반공 이데올로기와 국가 권력의 억압으로 인해 피해 경험조차 공개적으로 말하기 어려웠던 사회 분위기를 반영한다.\n\n의문-추적 구성\n순이 삼촌의 죽음에 대한 질문이 과거의 진실을 찾아가는 서사적 동력이 된다. 개인의 죽음에 대한 추적은 은폐된 역사에 대한 객관적 탐구로 확대된다.\n\n문체와 의의\n작가는 감정을 과장하기보다 사실을 절제된 문체로 제시해 비극의 실상을 드러낸다. 이 작품은 제주 4·3 사건을 문학적으로 공론화하고, 한국 현대사의 금기를 해체하는 데 중요한 역할을 했다.\n\n시험 포인트\n순이 삼촌의 죽음은 단순한 개인의 비극이 아니라 국가 폭력과 역사적 침묵이 남긴 결과로 이해해야 한다. '옴팡밭'은 학살의 기억이 현재까지 남아 있는 장소라는 점에서 중요하다.`
+};
+const quizData={
+hwang:[
+["황만근에 대한 마을 사람들의 태도로 가장 적절한 것은?",["그의 성실함을 존경하며 늘 보답한다","그를 무시하면서도 그의 노동력에는 의존한다","그를 마을의 지도자로 대우한다","그의 농사 방식을 모두 따른다"],1,"마을 사람들은 황만근을 놀리고 무시하지만 궂은일을 맡기는 데에는 익숙하다."],
+["민씨가 다른 마을 사람들과 구별되는 이유는?",["황만근의 재산을 물려받으려 해서","농민 궐기 대회를 반대해서","황만근의 진정한 성품과 가치를 알아보아서","황만근과 친척이어서"],2,"민씨는 황만근의 이타성과 성실함을 알아보고 그의 죽음을 진심으로 안타까워한다."],
+["황만근이 민씨와 나눈 대화에서 비판한 것은?",["농촌을 떠나는 청년들","무리하게 농사짓고 빚을 내는 태도","마을의 오래된 풍습","농민 궐기 대회 자체"],1,"황만근은 큰돈을 벌기 위해 무리하게 농사를 짓고 빚을 내는 이웃들의 태도를 비판한다."],
+["황만근의 죽음이 드러내는 역설로 가장 적절한 것은?",["가장 부유한 사람이 가장 가난하게 죽는다","마을을 위해 헌신한 사람이 공동체의 보살핌을 받지 못한다","도시 사람이 농촌에 적응하지 못한다","농민 대회가 모든 문제를 해결한다"],1,"공동체를 위해 일한 황만근은 정작 위험한 상황에서 보호받지 못한다."],
+["작품에서 해학과 풍자를 사용하는 주된 효과는?",["농촌 생활을 아름답게만 묘사한다","사건의 원인을 감춘다","웃음 속에서 공동체의 이기심과 사회 모순을 비판한다","황만근의 행동을 비난한다"],2,"웃음의 이면에서 약자를 이용하고 존중하지 않는 사회의 모순을 드러낸다."],
+["농민 궐기 대회와 농가 부채는 무엇을 보여 주는가?",["1990년대 후반 농촌의 경제적 어려움","산업화 이전의 풍요로운 농촌","도시 노동자의 생활상","농촌의 인구 증가"],0,"농가 부채와 무리한 영농은 당시 농촌의 경제적 위기를 반영한다."],
+["황만근의 인물 성격으로 가장 적절한 것은?",["계산적이고 냉정하다","성실하고 이타적이며 인정이 많다","권력을 얻으려 한다","타인의 도움만 기다린다"],1,"겉모습과 달리 가족과 이웃을 위해 헌신하는 인물이다."],
+["황만근과 마을 사람들의 관계를 통해 강조되는 것은?",["외모의 중요성","공동체의 이기심과 진정한 인간적 가치의 대비","세대 갈등","도시와 농촌의 문화 차이만"],1,"황만근의 이타적 삶과 마을 사람들의 타산적 태도가 대비된다."]
+],
+dark:[
+["「어둠의 혼」의 시대적 배경으로 적절한 것은?",["조선 후기 세도 정치","광복 직후 좌우익 이념 대립 시기","일제 강점기 말기","산업화가 진행된 1970년대"],1,"작품은 광복 이후 좌우익 대립이 격화된 시기를 배경으로 한다."],
+["어린 갑해에게 가장 절실하게 다가오는 것은?",["좌우익 이념의 논리","정치적 권력의 향방","당장의 굶주림과 현실적 고통","독립운동의 역사"],2,"갑해는 이념의 의미보다 몸으로 느끼는 배고픔을 먼저 인식한다."],
+["갑해가 아버지에게 느끼는 감정으로 적절한 것은?",["존경만 느낀다","원망과 연민이 함께 존재한다","아무 감정도 없다","분노만 있고 연민은 없다"],1,"가족을 굶주리게 한 원망과 도망치던 아버지에 대한 연민이 공존한다."],
+["갑해가 아버지의 죽음을 확인하는 장면에서 그를 데려간 인물은?",["민씨","이모","이모부","마을 이장"],2,"이모부가 갑해를 지서 뒤뜰로 데려가 아버지의 시신을 보여 준다."],
+["어린아이의 시각을 사용한 효과는?",["정치 이념을 논리적으로 설명한다","전쟁의 비극을 아이의 현실적 경험을 통해 드러낸다","사건을 희극적으로 바꾼다","아버지의 행동을 정당화한다"],1,"아이의 제한된 인식은 이념보다 굶주림과 가족 상실을 앞세워 비극을 부각한다."],
+["갑해가 아버지의 죽음을 실감한 뒤 생각하는 내용은?",["복수해야 한다는 결심","어떤 슬픔과 고통도 견디며 살아갈 용기가 필요하다는 생각","고향을 떠나야 한다는 생각","이념을 선택해야 한다는 생각"],1,"갑해는 이모부의 행동을 삶의 고통을 견디라는 뜻으로 짐작한다."],
+["작품이 비판적으로 드러내는 현실은?",["농촌의 산업 구조","좌우익 이념 대립이 평범한 가족에게 남긴 폭력과 상처","도시화로 인한 환경 문제","세대 간 교육 격차"],1,"이념 대립의 결과로 개인과 가족이 겪는 고통을 보여 준다."],
+["제목의 '어둠'을 가장 적절하게 해석한 것은?",["밤의 자연 풍경만을 뜻한다","분단과 이념 대립으로 얼룩진 시대적 현실","갑해의 시력 문제","농촌의 계절 변화"],1,"어둠은 분단과 폭력, 이념 갈등의 암울한 시대를 상징적으로 나타낸다."]
+],
+soon:[
+["「순이 삼촌」에서 서술자 '나'가 고향에 간 목적은?",["농사를 짓기 위해","할아버지 제사에 참석하기 위해","취업하기 위해","순이 삼촌을 데려오기 위해"],1,"'나'는 할아버지 제사에 참석하려고 고향에 들렀다가 순이 삼촌의 죽음을 알게 된다."],
+["순이 삼촌이 겪은 과거의 비극은 무엇인가?",["한국전쟁 중 피난","제주 4·3 사건 당시 두 자식을 잃고 학살 현장에서 살아남은 일","산업재해","자연재해"],1,"순이 삼촌은 제주 4·3 사건 당시 두 자식을 잃고 가까스로 살아남았다."],
+["순이 삼촌이 평생 겪은 정신적 고통의 원인으로 적절한 것은?",["경제적 성공에 대한 부담","과거 학살을 겪은 정신적 외상","도시 생활 부적응","가족 간 재산 다툼"],1,"학살의 경험은 환청과 신경 쇠약 등 지속적인 트라우마로 남았다."],
+["작품 속 '옴팡밭'의 의미로 가장 적절한 것은?",["풍요로운 농사의 상징","학살의 기억과 트라우마가 남아 있는 장소","도시로 떠나는 길","마을 축제 장소"],1,"옴팡밭은 과거 비극의 현장이자 순이 삼촌이 기억에서 벗어나지 못하는 장소다."],
+["작품의 구성 방식은?",["시간 순서대로만 진행되는 영웅담","죽음의 원인을 추적하며 과거의 진실을 밝히는 의문-추적 형식","여러 인물의 편지 모음","꿈속 사건을 나열하는 환상담"],1,"순이 삼촌의 죽음에 대한 의문이 제주 4·3 사건의 진실을 밝혀 가는 동력이 된다."],
+["등장인물들이 4·3 사건을 말하기 꺼리는 이유와 관련 깊은 것은?",["사건을 기억하지 못해서","반공 이데올로기와 국가 권력의 억압으로 침묵이 강요되었기 때문에","관광객이 많아서","마을에 기록이 없어서"],1,"오랜 세월 사건을 말하기 어려웠던 사회적 억압과 반공 이데올로기의 폭력성을 보여 준다."],
+["작품의 핵심 주제로 적절한 것은?",["개인의 성공과 출세","제주 4·3 사건의 비극과 은폐된 역사적 진실 규명","농촌 공동체의 경제 발전","세대 간 갈등 해소"],1,"작품은 민간인 학살의 참상과 생존자의 고통, 역사적 진실을 드러낸다."],
+["순이 삼촌의 죽음을 개인의 문제로만 볼 수 없는 이유는?",["그녀가 유명 인물이기 때문에","국가 폭력과 사회적 침묵이 남긴 역사적 상처와 연결되기 때문에","농사에 실패했기 때문에","도시로 이주했기 때문에"],1,"그의 죽음은 과거 학살과 그 진실을 말하지 못하게 한 사회적 억압의 결과와 연결된다."]
+]};
+let currentWork=null,pageIndex=0,selectedQuiz=null,selectedCount=5,questions=[],qIndex=0,chosen=null,checked=false,answersLog=[];
+const names={hwang:"황만근은 이렇게 말했다",dark:"어둠의 혼",soon:"순이 삼촌"};
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden')}
+function showShelf(){show('shelf')}
+function openReader(id){currentWork=id;pageIndex=0;show('reader');requestAnimationFrame(()=>{paginateReader();renderPage()})}
+let readerPages=[];
+let touchStartX=0;document.addEventListener('touchstart',e=>{if(document.getElementById('reader').classList.contains('hidden'))return;touchStartX=e.changedTouches[0].clientX},{passive:true});document.addEventListener('touchend',e=>{if(document.getElementById('reader').classList.contains('hidden'))return;const dx=e.changedTouches[0].clientX-touchStartX;if(Math.abs(dx)>55){if(dx<0)nextPage();else prevPage()}},{passive:true});document.addEventListener('keydown',e=>{if(document.getElementById('reader').classList.contains('hidden'))return;if(e.key==='ArrowRight')nextPage();if(e.key==='ArrowLeft')prevPage()});
+function paginateReader(){
+  if(!currentWork)return;
+  const area=document.getElementById('readArea'), el=document.getElementById('readText');
+  if(!area.clientHeight||!el.clientWidth)return;
+  const style=getComputedStyle(area);
+  const available=area.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom)-8;
+  const source=works[currentWork].pages.join('\n\n');
+  const paragraphs=source.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+  const pages=[];
+  const fits=text=>{el.textContent=text;return el.scrollHeight<=available;};
+  paragraphs.forEach(paragraph=>{
+    if(fits(paragraph)){
+      pages.push(paragraph);
+      return;
+    }
+    // 화면보다 긴 문단만 문장 경계에서 약 3문장씩 나눔
+    const sentences=(paragraph.match(/[^.!?。！？]+[.!?。！？]?/g)||[paragraph])
+      .map(x=>x.trim()).filter(Boolean);
+    let chunk=[];
+    sentences.forEach(sentence=>{
+      chunk.push(sentence);
+      if(chunk.length>=3){
+        pages.push(chunk.join(' '));
+        chunk=[];
+      }
+    });
+    if(chunk.length)pages.push(chunk.join(' '));
+  });
+  readerPages=pages.length?pages:[''];
+  pageIndex=Math.min(pageIndex,readerPages.length-1);
+}
+function renderPage(){let p=readerPages.length?readerPages:works[currentWork].pages;document.getElementById('readText').textContent=p[pageIndex]||'';updatePageButtons()}
+function updatePageButtons(){const total=readerPages.length||works[currentWork].pages.length;document.getElementById('prevPage').disabled=pageIndex===0;document.getElementById('nextPageBtn').disabled=pageIndex===total-1;document.getElementById('pageIndicator').textContent=(pageIndex+1)+' / '+total}
+function prevPage(){if(pageIndex>0){pageIndex--;renderPage()}}
+function nextPage(){const total=readerPages.length||works[currentWork].pages.length;if(pageIndex<total-1){pageIndex++;renderPage()}}
+let readerResizeTimer;window.addEventListener('resize',()=>{if(document.getElementById('reader').classList.contains('hidden'))return;clearTimeout(readerResizeTimer);readerResizeTimer=setTimeout(()=>{const old=pageIndex;paginateReader();pageIndex=Math.min(old,readerPages.length-1);renderPage()},100)});
+function makeBookChoices(target,handler){let el=document.getElementById(target);el.innerHTML='';Object.keys(works).forEach(id=>{let b=document.createElement('button');b.className='choice';b.innerHTML=`<strong>${names[id]}</strong><small>${works[id].author}</small>`;b.onclick=()=>handler(id,b);el.appendChild(b)})}
+function openQuizSelect(){selectedQuiz=null;selectedCount=5;makeBookChoices('quizBooks',(id,b)=>{selectedQuiz=id;document.querySelectorAll('#quizBooks .choice').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');validateQuizSetup()});document.getElementById('questionCount').value='5';document.getElementById('countError').textContent='1부터 8까지 숫자를 입력하세요.';validateQuizSetup();show('quizSelect')}
+function validateQuizSetup(){
+ const raw=document.getElementById('questionCount').value.trim();
+ const n=/^[1-8]$/.test(raw)?Number(raw):0;
+ selectedCount=n;
+ document.getElementById('quizStart').disabled=!(selectedQuiz&&n>=1&&n<=8);
+ const error=document.getElementById('countError');
+ error.textContent=n?'총 '+n+'문제를 출제합니다.':(raw?'1부터 8까지 입력할 수 있습니다.':'문제 수를 입력하세요.');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ const field=document.getElementById('questionCount');
+ field.addEventListener('input',()=>{
+   field.value=field.value.replace(/[^0-9]/g,'').slice(0,2);
+   const raw=field.value.trim();
+   if(raw&&Number(raw)>8){
+     window.alert('문제 수는 최대 8개입니다. 다시 입력해 주세요.');
+     field.value='';
+   }
+   validateQuizSetup();
+ });
+});
+function startQuiz(){if(!selectedQuiz)return;questions=quizData[selectedQuiz].slice(0,selectedCount);qIndex=0;chosen=null;checked=false;answersLog=[];renderQuestion();show('quiz')}
+function renderQuestion(){let q=questions[qIndex];document.getElementById('qMeta').textContent=`문제 ${qIndex+1} / ${questions.length}`;document.getElementById('qText').textContent=q[0];let a=document.getElementById('answers');a.innerHTML='';q[1].forEach((s,i)=>{let b=document.createElement('button');b.className='answer';b.textContent=`${i+1}. ${s}`;b.onclick=()=>{if(checked)return;chosen=i;document.querySelectorAll('.answer').forEach(x=>x.classList.remove('chosen'));b.classList.add('chosen');document.getElementById('nextQ').disabled=false};a.appendChild(b)});document.getElementById('feedback').classList.add('hidden');let next=document.getElementById('nextQ');next.textContent='정답 확인';next.disabled=true;chosen=null;checked=false}
+function nextQuestion(){if(!checked){if(chosen===null)return;let q=questions[qIndex],ok=chosen===q[2];answersLog.push({q:q[0],chosen,correct:q[2],ok,explain:q[3],options:q[1]});document.querySelectorAll('.answer').forEach((b,i)=>{if(i===q[2])b.classList.add('correct');else if(i===chosen)b.classList.add('wrong')});let f=document.getElementById('feedback');f.innerHTML=`<div class="quiz-explanation-title">${ok?'정답입니다.':'아쉽지만 정답은 '+(q[2]+1)+'번입니다.'}</div><div class="quiz-explanation"><div class="quiz-explanation-title">해설</div><p>${q[3]}</p></div>`;f.classList.remove('hidden');checked=true;document.getElementById('nextQ').textContent=qIndex===questions.length-1?'결과 보기':'다음 문제';return}if(qIndex<questions.length-1){qIndex++;renderQuestion()}else showResult()}
+function showResult(){
+ let score=answersLog.filter(x=>x.ok).length;
+ document.getElementById('score').textContent=`${score} / ${questions.length}`;
+ document.getElementById('scoreLabel').textContent=`정답률 ${Math.round(score/questions.length*100)}%`;
+ let list=document.getElementById('resultList');list.innerHTML='';
+ answersLog.forEach((x,i)=>{
+   let d=document.createElement('div');d.className='result-item';
+   const q=document.createElement('div');q.className='result-question';q.textContent=`${i+1}. ${x.ok?'정답':'오답'} · ${x.q}`;
+   const a=document.createElement('div');a.className='result-answer';a.textContent=`정답: ${x.options[x.correct]}`;
+   const e=document.createElement('div');e.className='result-explanation';
+   const h=document.createElement('strong');h.textContent='해설';
+   const p=document.createElement('span');p.textContent=x.explain;
+   e.append(h,p);d.append(q,a,e);list.appendChild(d);
+ });
+ show('result');
+}
+function openExplainSelect(){makeBookChoices('explainBooks',(id,b)=>{openExplain(id)});show('explainSelect')}
+function openExplain(id){
+ const body=document.getElementById('explainBody');body.innerHTML='';
+ const title=document.createElement('div');title.className='explain-work-title';
+ const name=document.createElement('strong');name.textContent=works[id].title;
+ const author=document.createElement('span');author.textContent=works[id].author;
+ title.append(name,author);body.appendChild(title);
+ const blocks=explain[id].split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+ blocks.forEach((block,index)=>{
+   const lineBreak=block.indexOf('\n');
+   const first=lineBreak>=0?block.slice(0,lineBreak).trim():'';
+   const rest=lineBreak>=0?block.slice(lineBreak+1).trim():'';
+   const isHeading=/^(인물 대비|농촌 현실|표현과 구성|시험 포인트|시대와 갈등|갑해의 복합 감정|시점의 효과|제목과 주제|역사적 배경|순이 삼촌의 트라우마|침묵과 반공 이데올로기|의문-추적 구성|문체와 의의)$/.test(first);
+   if(isHeading){
+     const h=document.createElement('h3');h.className='explain-heading';h.textContent=first;body.appendChild(h);
+     if(rest){const p=document.createElement('p');p.className='explain-paragraph';p.textContent=rest;body.appendChild(p);}
+   }else{
+     const p=document.createElement('p');p.className='explain-paragraph';p.textContent=block;body.appendChild(p);
+   }
+ });
+ show('explain');
+}
+</script>
+<script>
+// GitHub Pages의 하위 경로에서도 동작하도록 상대 경로로 서비스 워커 등록
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  });
+}
+</script>
+</body></html>
